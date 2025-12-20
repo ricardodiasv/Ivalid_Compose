@@ -2,10 +2,8 @@ package com.example.ivalid_compose.ui.cart
 
 import android.content.res.Resources
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,7 +13,6 @@ import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Remove
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -23,7 +20,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -38,11 +34,9 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.example.ivalid_compose.ui.theme.GreenAccent
 import com.example.ivalid_compose.ui.theme.RedPrimary
 import com.example.ivalid_compose.ui.theme.RedPrimaryDark
 import java.util.Locale
@@ -192,8 +186,6 @@ private fun CartItemRow(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val painter = safePainterResource(item.product.imageRes)
-
             Box(
                 modifier = Modifier
                     .size(68.dp)
@@ -201,17 +193,15 @@ private fun CartItemRow(
                     .background(Color(0xFFF2F2F2)),
                 contentAlignment = Alignment.Center
             ) {
-                if (painter != null) {
-                    Image(
-                        painter = painter,
+                androidx.compose.ui.util.trace("CartImage"){
+                    coil.compose.AsyncImage(
+                        model = item.product.urlImagem,
                         contentDescription = item.product.name,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(8.dp),
-                        contentScale = ContentScale.Fit
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop,
+                        error = coil.compose.rememberAsyncImagePainter(model = null),
+                        placeholder = coil.compose.rememberAsyncImagePainter(model = null)
                     )
-                } else {
-                    Text("Sem imagem", style = MaterialTheme.typography.labelSmall)
                 }
             }
 

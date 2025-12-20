@@ -1,6 +1,5 @@
 package com.example.ivalid_compose.ui.product
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,7 +17,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
@@ -90,15 +88,16 @@ fun ProductDetailsScreen(
                     .clip(RoundedCornerShape(16.dp))
                     .background(Color(0xFFF5F5F5))
             ) {
-                Image(
-                    painter = painterResource(id = product.imageRes),
+                coil.compose.AsyncImage(
+                    model = product.urlImagem,
                     contentDescription = product.name,
                     contentScale = ContentScale.Fit,
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(16.dp)
+                        .padding(16.dp),
+                    error = coil.compose.rememberAsyncImagePainter(model = null),
+                    placeholder = coil.compose.rememberAsyncImagePainter(model = null)
                 )
-
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopStart)
