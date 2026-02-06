@@ -2,8 +2,10 @@ package com.example.ivalid_compose.ui.cart
 
 import android.content.res.Resources
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -13,6 +15,7 @@ import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Remove
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -20,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -183,9 +187,11 @@ private fun CartItemRow(
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(8.dp), // Adicionado padding para não colar nas bordas
             verticalAlignment = Alignment.CenterVertically
         ) {
+            val painter = safePainterResource(item.product.imageRes)
+
             Box(
                 modifier = Modifier
                     .size(68.dp)
@@ -193,15 +199,17 @@ private fun CartItemRow(
                     .background(Color(0xFFF2F2F2)),
                 contentAlignment = Alignment.Center
             ) {
-                androidx.compose.ui.util.trace("CartImage"){
-                    coil.compose.AsyncImage(
-                        model = item.product.urlImagem,
+                if (painter != null) {
+                    Image(
+                        painter = painter,
                         contentDescription = item.product.name,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop,
-                        error = coil.compose.rememberAsyncImagePainter(model = null),
-                        placeholder = coil.compose.rememberAsyncImagePainter(model = null)
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(8.dp),
+                        contentScale = ContentScale.Fit
                     )
+                } else {
+                    Text("Sem imagem", style = MaterialTheme.typography.labelSmall)
                 }
             }
 
@@ -235,7 +243,7 @@ private fun CartItemRow(
                     if (item.product.priceOriginal > item.product.priceNow) {
                         PriceTextStruck(
                             text = "R$ ${"%.2f".format(java.util.Locale("pt", "BR"), item.product.priceOriginal)}",
-                            textColor = Color.Black,
+                            textColor = Color.Gray,
                             lineColor = MaterialTheme.colorScheme.onSurfaceVariant,
                             thickness = 1.3.dp,
                             yFactor = 0.56f,

@@ -38,7 +38,7 @@ data class OrdersUiState(
 )
 
 class OrdersViewModel: ViewModel(){
-    var uiState by mutableStateOf(OrdersUiState())
+    var uiState by mutableStateOf(OrdersUiState(orders = mockOrders))
         private set
 
     init{
@@ -68,7 +68,6 @@ class OrdersViewModel: ViewModel(){
                     .await()
 
                 val ordersList = result.documents.mapNotNull { document ->
-                    try {
                     val total = (document.get("total") as? Number)?.toDouble() ?: 0.0
                     val status = document.getString("status") ?: "Status desconhecido"
                     val timestamp = document.getTimestamp("timestamp")?.toDate() ?: Date()
@@ -93,9 +92,6 @@ class OrdersViewModel: ViewModel(){
                         status = status,
                         items = ordersItems
                     )
-                } catch (e: Exception){
-                    null
-                    }
                 }
 
                 uiState = uiState.copy(
@@ -111,3 +107,59 @@ class OrdersViewModel: ViewModel(){
         }
     }
 }
+
+private val mockProducts = listOf(
+    Product(
+        id = "p1",
+        name = "Pão Francês 500g",
+        priceNow = 4.99,
+        priceOriginal = 8.49,
+        expiresInDays = 1,
+        isFavorite = false,
+        imageRes = R.drawable.pao_frances,
+        distanceKm = 0.8,
+        storeName = "Padaria Central",
+        brand = "Visconti",
+        categoryId = "Padaria"
+    ),
+    Product(
+        id = "p2",
+        name = "Milho Cozido 200g",
+        priceNow = 2.25,
+        priceOriginal = 5.30,
+        expiresInDays = 3,
+        isFavorite = false,
+        imageRes = R.drawable.milho_lata,
+        distanceKm = 1.2,
+        storeName = "Mercado Goiás",
+        brand = "Quero",
+        categoryId = "Enlatados"
+    ),
+    Product(
+        id = "p3",
+        name = "Vinho Tinto 750ml",
+        priceNow = 29.90,
+        priceOriginal = 35.50,
+        expiresInDays = 5,
+        isFavorite = true,
+        imageRes = R.drawable.vinho,
+        distanceKm = 3.1,
+        storeName = "Assaí",
+        brand = "Pérgola",
+        categoryId = "Bebidas"
+    )
+)
+
+private val mockOrders = listOf(
+    Order(
+        id = "ABC12345",
+        date = "25/10/2025",
+        total = 75.50,
+        status = "Pagamento Pendente",
+        items = listOf(
+            OrderItem(mockProducts[0].name, 5, 24.95),
+            OrderItem(mockProducts[1].name, 2, 4.50),
+            OrderItem(mockProducts[2].name, 1, 46.05)
+        )
+    ),
+)

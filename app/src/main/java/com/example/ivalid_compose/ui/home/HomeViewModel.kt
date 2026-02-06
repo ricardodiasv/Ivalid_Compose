@@ -4,16 +4,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.ivalid_compose.repository.ProductRepository
-import kotlinx.coroutines.launch
+import com.example.ivalid_compose.R
 import kotlin.math.roundToInt
 
 data class Category(
-    val id: String = "",
-    val name: String = "",
+    val id: String,
+    val name: String,
     val icon: Int? = null
 )
+
 enum class ProductSortOption {
     DEFAULT,
     PRICE_ASC,      // Menor Preço (Ascendente)
@@ -24,25 +23,21 @@ enum class ProductSortOption {
     DISTANCE_DESC   // Mais Distante (Maior KM)
 }
 
-
 data class Product(
-    val id: String = "",
-    val name: String = "",
-    val brand: String = "",
-    val urlImagem: String = "",
-    val storeName: String = "",
-    val distanceKm: Double = 0.0,
-    val priceOriginal: Double = 0.0,
-    val priceNow: Double = 0.0,
-    val expiresInDays: Int = 0,
-    val categoryId: String = "",
+    val id: String,
+    val name: String,
+    val brand: String,
+    val imageRes: Int,
+    val storeName: String,
+    val distanceKm: Double,
+    val priceOriginal: Double,
+    val priceNow: Double,
+    val expiresInDays: Int,
+    val categoryId: String,
     val isFavorite: Boolean = false
 ) {
     val discountPercent: Int
-        get() = if (priceOriginal > 0) {
-            val res = ((priceOriginal - priceNow) / priceOriginal) * 100
-            if (res.isNaN()) 0 else res.roundToInt().coerceAtLeast(0)
-        } else 0
+        get() = (((priceOriginal - priceNow) / priceOriginal) * 100).roundToInt().coerceAtLeast(0)
 }
 
 data class HomeUiState(
@@ -55,29 +50,93 @@ data class HomeUiState(
     val currentSort: ProductSortOption = ProductSortOption.DEFAULT
 )
 
-class HomeViewModel (private val repository: ProductRepository = ProductRepository()) : ViewModel() {
+class HomeViewModel : ViewModel() {
 
     var uiState by mutableStateOf(HomeUiState())
         private set
 
     init {
-        loadFromFirestore()
+        loadInitial()
     }
 
-    private fun loadFromFirestore(){
-        uiState = uiState.copy(isLoading = true)
+    private fun loadInitial() {
+        val cats = listOf(
+            Category("all", "Tudo"),
+            Category("enlatados", "Enlatados"),
+            Category("padaria", "Padaria"),
+            Category("frios", "Frios"),
+            Category("bebidas", "Bebidas"),
+            Category("congelados", "Congelados"),
+        )
 
-        viewModelScope.launch {
-            val products = repository.getProducts()
-            val categories = repository.getCategories()
-
-            uiState = uiState.copy(
-                allProducts = products,
-                categories = if(categories.isEmpty()) uiState.categories else categories,
-                isLoading = false
+        val prods = listOf(
+            Product(
+                id = "1",
+                name = "Milho Cozido 200g",
+                brand = "Ivalid",
+                imageRes = R.drawable.milho_lata,
+                storeName = "Mercado Goiás",
+                distanceKm = 1.2,
+                priceOriginal = 5.30,
+                priceNow = 2.25,
+                expiresInDays = 2,
+                categoryId = "enlatados"
+            ),
+            Product(
+                id = "2",
+                name = "Pão Francês 500g",
+                brand = "Ivalid",
+                imageRes = R.drawable.pao_frances,
+                storeName = "Padaria Central",
+                distanceKm = 0.8,
+                priceOriginal = 8.49,
+                priceNow = 4.99,
+                expiresInDays = 1,
+                categoryId = "padaria"
+            ),
+            Product(
+                id = "3",
+                name = "Presunto Suinco 200g",
+                brand = "Suinco",
+                imageRes = R.drawable.presunto,
+                storeName = "Store",
+                distanceKm = 2.5,
+                priceOriginal = 10.50,
+                priceNow = 8.99,
+                expiresInDays = 5,
+                categoryId = "frios"
+            ),
+            Product(
+                id = "4",
+                name = "Leite Integral 1L",
+                brand = "Itambé",
+                imageRes = R.drawable.leite,
+                storeName = "Super Popular",
+                distanceKm = 3.1,
+                priceOriginal = 5.50,
+                priceNow = 3.99,
+                expiresInDays = 7,
+                categoryId = "all"
+            ),
+            Product(
+                id = "5",
+                name = "Vinho Tinto 750ml",
+                brand = "Pérgola",
+                imageRes = R.drawable.vinho,
+                storeName = "Assaí",
+                distanceKm = 3.1,
+                priceOriginal = 35.50,
+                priceNow = 29.90,
+                expiresInDays = 5,
+                categoryId = "bebidas"
             )
-            applyFilters()
-        }
+        )
+
+        uiState = HomeUiState(
+            categories = cats,
+            allProducts = prods
+        )
+        applyFilters()
     }
 
     fun onQueryChange(new: String) {
@@ -116,7 +175,7 @@ class HomeViewModel (private val repository: ProductRepository = ProductReposito
             matchesQuery && matchesCat
         }
 
-        filtered = when(uiState.currentSort){
+        filtered = when(uiState.currentSort) {
             ProductSortOption.PRICE_ASC -> filtered.sortedBy { it.priceNow }
             ProductSortOption.PRICE_DESC -> filtered.sortedByDescending { it.priceNow }
 
@@ -126,8 +185,8 @@ class HomeViewModel (private val repository: ProductRepository = ProductReposito
             ProductSortOption.DISTANCE_ASC -> filtered.sortedBy { it.distanceKm }
             ProductSortOption.DISTANCE_DESC -> filtered.sortedByDescending { it.distanceKm }
 
-            ProductSortOption.DEFAULT -> filtered.sortedWith (
-                compareBy<Product> {it.expiresInDays}
+            ProductSortOption.DEFAULT -> filtered.sortedWith(
+                compareBy<Product> { it.expiresInDays }
                     .thenByDescending { it.discountPercent }
             )
         }

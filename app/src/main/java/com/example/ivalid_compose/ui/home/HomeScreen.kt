@@ -7,8 +7,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ListAlt
 import androidx.compose.material.icons.filled.Check
@@ -43,7 +48,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import coil.compose.AsyncImage
 import com.example.ivalid_compose.R
 import com.example.ivalid_compose.ui.profile.ProfileViewModel
 import com.example.ivalid_compose.ui.theme.AppTheme
@@ -455,13 +459,13 @@ private fun ProductCard(
                     .clip(RoundedCornerShape(12.dp))
                     .background(Color(0xFFF5F5F5))
             ) {
-                AsyncImage(
-                    model = product.urlImagem,
-                    contentDescription = "Imagem de ${product.name}",
+                Image(
+                    painter = painterResource(id = product.imageRes),
+                    contentDescription = product.name,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(120.dp),
-                    contentScale = ContentScale.Crop
+                        .fillMaxSize()
+                        .padding(10.dp),
+                    contentScale = ContentScale.Fit
                 )
 
                 Box(
